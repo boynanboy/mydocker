@@ -17,13 +17,12 @@ func RunContainerInitProcess() error {
 		return fmt.Errorf("Run container get user command error, cmdArray is nil")
 	}
 
-	//setUpMount()
-
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("Exec loop path error %v", err)
 		return err
 	}
+    setUpMount()
 	log.Infof("Find path %s", path)
 	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
 		log.Errorf(err.Error())
@@ -52,6 +51,8 @@ func setUpMount() {
 		return
 	}
 	log.Infof("Current location is %s", pwd)
+    // enable the mount namespace works properly on my archlinux computer
+    syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 	pivotRoot(pwd)
 
 	//mount proc
@@ -66,7 +67,8 @@ func pivotRoot(root string) error {
 	  为了使当前root的老 root 和新 root 不在同一个文件系统下，我们把root重新mount了一次
 	  bind mount是把相同的内容换了一个挂载点的挂载方法
 	*/
-	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+	log.Infof("debug here pivotRoot:" + root)
+	if err := syscall.Mount(root, root, "bind", syscall.MS_PRIVATE | syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("Mount rootfs to itself error: %v", err)
 	}
 	// 创建 rootfs/.pivot_root 存储 old_root

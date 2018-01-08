@@ -4,8 +4,8 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
-	"github.com/xianlubird/mydocker/container"
-	"github.com/xianlubird/mydocker/cgroups/subsystems"
+	"./cgroups/subsystems"
+	"./container"
 )
 
 var runCommand = cli.Command{
@@ -35,9 +35,15 @@ var runCommand = cli.Command{
 			return fmt.Errorf("Missing container command")
 		}
 		var cmdArray []string
-		for _, arg := range context.Args() {
+		for test, arg := range context.Args() {
+	        log.Infof("debug here append")
+            output := fmt.Sprintf("%s%d", arg, test)
+	        log.Infof(output)
 			cmdArray = append(cmdArray, arg)
 		}
+        memory_limit := context.String("m")
+	    log.Infof("debug here memory context")
+	    log.Infof(memory_limit)
 		tty := context.Bool("ti")
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("m"),

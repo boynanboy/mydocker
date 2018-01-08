@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/xianlubird/mydocker/container"
-	"github.com/xianlubird/mydocker/cgroups/subsystems"
-	"github.com/xianlubird/mydocker/cgroups"
+	"./container"
+	"./cgroups/subsystems"
+	"./cgroups"
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"strings"
