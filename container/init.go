@@ -24,6 +24,7 @@ func RunContainerInitProcess() error {
 	}
     setUpMount()
 	log.Infof("Find path %s", path)
+
 	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
 		log.Errorf(err.Error())
 	}
@@ -68,25 +69,25 @@ func pivotRoot(root string) error {
 	  bind mount是把相同的内容换了一个挂载点的挂载方法
 	*/
 	log.Infof("debug here pivotRoot:" + root)
-	if err := syscall.Mount(root, root, "bind", syscall.MS_PRIVATE | syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
-		return fmt.Errorf("Mount rootfs to itself error: %v", err)
+	if err := syscall.Mount(root, root, "bind", syscall.MS_PRIVATE|syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+		log.Errorf("Mount rootfs to itself error: %v", err)
 	}
 	// 创建 rootfs/.pivot_root 存储 old_root
-	pivotDir := filepath.Join(root, ".pivot_root")
+	pivotDir := filepath.Join(root, "pivot_root")
 	if err := os.Mkdir(pivotDir, 0777); err != nil {
-		return err
+        log.Errorf("failed to create pivot root: %v", err)
 	}
 	// pivot_root 到新的rootfs, 现在老的 old_root 是挂载在rootfs/.pivot_root
 	// 挂载点现在依然可以在mount命令中看到
 	if err := syscall.PivotRoot(root, pivotDir); err != nil {
-		return fmt.Errorf("pivot_root %v", err)
+		log.Errorf("pivot_root %v", err)
 	}
 	// 修改当前的工作目录到根目录
 	if err := syscall.Chdir("/"); err != nil {
-		return fmt.Errorf("chdir / %v", err)
+		log.Errorf("chdir / %v", err)
 	}
 
-	pivotDir = filepath.Join("/", ".pivot_root")
+	pivotDir = filepath.Join("/", "pivot_root")
 	// umount rootfs/.pivot_root
 	if err := syscall.Unmount(pivotDir, syscall.MNT_DETACH); err != nil {
 		return fmt.Errorf("unmount pivot_root dir %v", err)

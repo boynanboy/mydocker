@@ -36,7 +36,6 @@ var runCommand = cli.Command{
 		}
 		var cmdArray []string
 		for test, arg := range context.Args() {
-	        log.Infof("debug here append")
             output := fmt.Sprintf("%s%d", arg, test)
 	        log.Infof(output)
 			cmdArray = append(cmdArray, arg)
