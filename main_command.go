@@ -35,14 +35,9 @@ var runCommand = cli.Command{
 			return fmt.Errorf("Missing container command")
 		}
 		var cmdArray []string
-		for test, arg := range context.Args() {
-            output := fmt.Sprintf("%s%d", arg, test)
-	        log.Infof(output)
+		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
-        memory_limit := context.String("m")
-	    log.Infof("debug here memory context")
-	    log.Infof(memory_limit)
 		tty := context.Bool("ti")
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("m"),
