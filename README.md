@@ -18,7 +18,10 @@ It is almost the same as code-3.3-cheng due the issue of code of the book code-3
 add Cmd.Dir which gives a static image layer
 
 # for the code of Chapter 4.2 and whats next
-Using overlayfs instead of aufs to container writable layer and base readble image layer
+Using overlayfs instead of aufs to implement container writable layer and base readble image layer
+
+# for the code of Chapter 4.3 and whats next
+Using bind mount instead of aufs to implement docker volume
 
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine

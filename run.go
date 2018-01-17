@@ -10,8 +10,8 @@ import (
 )
 
 
-func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
-	parent, writePipe := container.NewParentProcess(tty)
+func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string) {
+	parent, writePipe := container.NewParentProcess(tty, volume)
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
@@ -28,9 +28,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
 
 	sendInitCommand(comArray, writePipe)
 	parent.Wait()
-    // this is ugly at the moment duplicate with the code in
-    // container/container_process.go
-	container.DeleteWorkSpace()
+	container.DeleteWorkSpace(volume)
 	os.Exit(0)
 }
 
