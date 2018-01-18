@@ -23,6 +23,11 @@ Using overlayfs instead of aufs to implement container writable layer and base r
 # for the code of Chapter 4.3 and whats next
 Using bind mount instead of aufs to implement docker volume
 
+# for the code of Chapter 4.4 and whats next
+the code 4.4 actually implemented a mini version of "docker export"
+instead of "docker commit", so I just changed name of command and
+functions to "export"
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
