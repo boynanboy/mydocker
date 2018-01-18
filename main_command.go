@@ -52,3 +52,16 @@ var initCommand = cli.Command{
 		return err
 	},
 }
+
+var exportCommand = cli.Command{
+	Name:  "export",
+	Usage: "export current running container into tar",
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("Missing container name")
+		}
+		imageName := context.Args().Get(0)
+		exportContainer(imageName)
+		return nil
+	},
+}
