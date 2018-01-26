@@ -11,7 +11,7 @@ import (
 var runCommand = cli.Command{
 	Name: "run",
 	Usage: `Create a container with namespace and cgroups limit
-			mydocker run -ti [command]`,
+			mydocker run [-ti|-d] [command]`,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "ti",
@@ -21,6 +21,23 @@ var runCommand = cli.Command{
 			Name:  "v",
 			Usage: "volume",
 		},
+		cli.BoolFlag{
+			Name:  "d",
+			Usage: "detach container",
+		},
+		cli.StringFlag{
+			Name: "m",
+			Usage: "memory limit",
+		},
+		cli.StringFlag{
+			Name: "cpushare",
+			Usage: "cpushare limit",
+		},
+		cli.StringFlag{
+			Name: "cpuset",
+			Usage: "cpuset limit",
+		},
+
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -37,6 +54,10 @@ var runCommand = cli.Command{
         }
 
 		tty := context.Bool("ti")
+        detach := context.Bool("d")
+        if tty && detach {
+            return fmt.Errorf("ti and d paramter can not both provided")
+        }
 		volume := context.String("v")
 		Run(tty, cmdArray, resConf, volume)
 		return nil

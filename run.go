@@ -27,9 +27,11 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 	cgroupManager.Apply(parent.Process.Pid)
 
 	sendInitCommand(comArray, writePipe)
-	parent.Wait()
-	container.DeleteWorkSpace(volume)
-	os.Exit(0)
+    // stop container will not cause temp container workspace got removed
+    // that is done by remove container
+    if tty {
+	    parent.Wait()
+    }
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {

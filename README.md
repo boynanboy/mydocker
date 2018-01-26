@@ -28,6 +28,10 @@ the code 4.4 actually implemented a mini version of "docker export"
 instead of "docker commit", so I just changed name of command and
 functions to "export"
 
+# for the code of Chapter 5.1
+exactly the same as original book
+I fix the issue that I miss remove the cgroup management in previouse commit
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
