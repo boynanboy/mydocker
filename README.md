@@ -32,6 +32,12 @@ functions to "export"
 exactly the same as original book
 I fix the issue that I miss remove the cgroup management in previouse commit
 
+# for the code of Chapter 5.2 and whats next
+each docker container will have its own writeable layer based on their names
+fixed one import problem
+all container information will be stored in a local directory instead in /var/run/mydocker
+
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
