@@ -37,6 +37,10 @@ var runCommand = cli.Command{
 			Name: "cpuset",
 			Usage: "cpuset limit",
 		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "container name",
+		},
 
 	},
 	Action: func(context *cli.Context) error {
@@ -59,7 +63,8 @@ var runCommand = cli.Command{
             return fmt.Errorf("ti and d paramter can not both provided")
         }
 		volume := context.String("v")
-		Run(tty, cmdArray, resConf, volume)
+		containerName := context.String("name")
+		Run(tty, cmdArray, resConf, volume, containerName)
 		return nil
 	},
 }
@@ -86,3 +91,12 @@ var exportCommand = cli.Command{
 		return nil
 	},
 }
+
+var listCommand = cli.Command{
+	Name:  "ps",
+	Usage: "list all the containers",
+	Action: func(context *cli.Context) error {
+		ListContainers()
+ 		return nil
+ 	},
+ }

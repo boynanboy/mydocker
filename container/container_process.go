@@ -8,7 +8,24 @@ import (
 	"strings"
 )
 
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+var (
+	RUNNING             string = "running"
+	STOP                string = "stopped"
+	Exit                string = "exited"
+	DefaultInfoLocation string = "./configs/%s/"
+	ConfigName          string = "config.json"
+)
+
+type ContainerInfo struct {
+	Pid         string `json:"pid"` //容器的init进程在宿主机上的 PID
+	Id          string `json:"id"`  //容器Id
+	Name        string `json:"name"`  //容器名
+	Command     string `json:"command"`    //容器内init运行命令
+	CreatedTime string `json:"createTime"` //创建时间
+	Status      string `json:"status"`     //容器的状态
+}
+
+func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		log.Errorf("New pipe error %v", err)
@@ -26,10 +43,10 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
     imageURL := "./image"
-    // a index thing that is only needed for overlayfs do not totally 
+    // a index thing that is only needed for overlayfs do not totally
     // understand yet
-	NewWorkSpace(imageURL, volume)
-	cmd.Dir = "./merged"
+	NewWorkSpace(imageURL, volume, containerName)
+	cmd.Dir = "./merged/" + containerName
 	return cmd, writePipe
 }
 
@@ -65,10 +82,10 @@ func createContainerLayer(mergedURL string, imageURL string, indexURL string, wr
 
 }
 
-func NewWorkSpace(imageURL string, volume string) {
-    mergedURL := "./merged"
-    indexURL := "./index"
-    writeLayerURL := "./container_layer"
+func NewWorkSpace(imageURL string, volume string, containerName string) {
+    mergedURL := "./merged/" + containerName
+    indexURL := "./index/" + containerName
+    writeLayerURL := "./container_layer/" + containerName
     createContainerLayer(mergedURL, imageURL, indexURL, writeLayerURL)
     if(volume != ""){
         volumeURLs := volumeUrlExtract(volume)
@@ -104,10 +121,10 @@ func MountVolume(mergedURL string, volumeURLs []string)  {
 }
 
 
-func DeleteWorkSpace(volume string) {
-    mergedURL := "./merged"
-    writeLayerURL := "./container_layer"
-    indexURL := "./index"
+func DeleteWorkSpace(containerName string, volume string) {
+    mergedURL := "./merged/" + containerName
+    writeLayerURL := "./container_layer/" + containerName
+    indexURL := "./index/" + containerName
     if(volume != ""){
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
