@@ -62,6 +62,7 @@ var runCommand = cli.Command{
         if tty && detach {
             return fmt.Errorf("ti and d paramter can not both provided")
         }
+        log.Infof("tty enabled %v", tty)
 		volume := context.String("v")
 		containerName := context.String("name")
 		Run(tty, cmdArray, resConf, volume, containerName)
@@ -100,3 +101,17 @@ var listCommand = cli.Command{
  		return nil
  	},
  }
+
+
+var logCommand = cli.Command{
+	Name: "logs",
+	Usage: "print logs of a container",
+	Action: func(context *cli.Context) error {
+        if len(context.Args()) < 1 {
+            return fmt.Errorf("Please input your container name")
+        }
+        containerName := context.Args().Get(0)
+        logContainer(containerName)
+        return nil
+	},
+}

@@ -3,4 +3,5 @@ mydocker
 volume
 merged
 index
-
+info
+logs

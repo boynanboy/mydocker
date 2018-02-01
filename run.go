@@ -47,7 +47,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
     if tty {
 	    parent.Wait()
 		//deleteContainerInfo(containerName)
-        //DeleteWorkSpace(containerName, volume)
+        container.DeleteWorkSpace(containerName, volume)
     }
 }
 

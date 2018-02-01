@@ -37,6 +37,11 @@ each docker container will have its own writeable layer based on their names
 fixed one import problem
 all container information will be stored in a local directory instead in /var/run/mydocker
 
+# for the code of Chapter 5.3 and whats next
+all logs will be stored in current directory logs, each container will have a different log file based on its name
+
+fix the issue where logs and info are not removed in delete workspace
+
 
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine

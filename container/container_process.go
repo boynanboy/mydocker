@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"os/exec"
+    "fmt"
 	"syscall"
 	"strings"
 )
@@ -12,7 +13,8 @@ var (
 	RUNNING             string = "running"
 	STOP                string = "stopped"
 	Exit                string = "exited"
-	DefaultInfoLocation string = "./configs/%s/"
+	DefaultInfoLocation string = "./info/%s/"
+	DefaultLogLocation string = "./logs/%s.log"
 	ConfigName          string = "config.json"
 )
 
@@ -40,7 +42,18 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-	}
+	} else {
+        // makes logs dir if it is not exists
+        os.MkdirAll(DefaultLogLocation, os.ModePerm)
+        stdLogFilePath := fmt.Sprintf(DefaultLogLocation, containerName)
+        stdLogFile, err := os.Create(stdLogFilePath)
+        if err != nil {
+            log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+            return nil, nil
+        }
+        cmd.Stdout = stdLogFile
+ 	}
+
 	cmd.ExtraFiles = []*os.File{readPipe}
     imageURL := "./image"
     // a index thing that is only needed for overlayfs do not totally
@@ -93,7 +106,7 @@ func NewWorkSpace(imageURL string, volume string, containerName string) {
         if(length == 2 && volumeURLs[0] != "" && volumeURLs[1] !=""){
             log.Infof("%q",volumeURLs)
             MountVolume(mergedURL, volumeURLs)
-        }else{
+        } else {
             log.Infof("Volume parameter input is not correct.")
         }
     }
@@ -125,6 +138,8 @@ func DeleteWorkSpace(containerName string, volume string) {
     mergedURL := "./merged/" + containerName
     writeLayerURL := "./container_layer/" + containerName
     indexURL := "./index/" + containerName
+    logURL := fmt.Sprintf(DefaultLogLocation, containerName)
+    infoURL := fmt.Sprintf(DefaultInfoLocation, containerName)
     if(volume != ""){
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
@@ -156,6 +171,13 @@ func DeleteWorkSpace(containerName string, volume string) {
 	}
 	if err := os.RemoveAll(indexURL); err != nil {
 		log.Errorf("Remove dir %s error %v", indexURL, err)
+	}
+    // remove container info and log if there is any
+	if err := os.RemoveAll(logURL); err != nil {
+		log.Errorf("Remove dir %s error %v", logURL, err)
+	}
+	if err := os.RemoveAll(infoURL); err != nil {
+		log.Errorf("Remove dir %s error %v", infoURL, err)
 	}
 }
 
