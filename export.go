@@ -8,7 +8,7 @@ import (
 )
 
 func exportContainer(imageName string){
-	mergedURL := "./merged"
+	mergedURL := "./merged/" + imageName
 	imageTar := "./" + imageName + ".tar"
 	fmt.Printf("exported %s", imageTar)
 	if _, err := exec.Command("tar", "-czf", imageTar, "-C", mergedURL, ".").CombinedOutput(); err != nil {
