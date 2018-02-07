@@ -20,6 +20,9 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 		log.Error(err)
 	}
 
+	//record container info
+    log.Infof("parent process id: %d", parent.Process.Pid)
+
 	// use mydocker-cgroup as cgroup name
 	cgroupManager := cgroups.NewCgroupManager("mydocker-cgroup")
 	defer cgroupManager.Destroy()
