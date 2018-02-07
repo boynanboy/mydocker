@@ -21,6 +21,7 @@ func main() {
         exportCommand,
 		listCommand,
 		logCommand,
+		execCommand,
 	}
 
 	app.Before = func(context *cli.Context) error {
