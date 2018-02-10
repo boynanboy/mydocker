@@ -59,3 +59,16 @@ func getContainerInfoByName(containerName string) (*container.ContainerInfo, err
 	}
 	return &containerInfo, nil
 }
+
+func removeContainer(containerName string) {
+	containerInfo, err := getContainerInfoByName(containerName)
+	if err != nil {
+		log.Errorf("Get container %s info error %v", containerName, err)
+		return
+	}
+	if containerInfo.Status != container.STOP {
+		log.Errorf("Couldn't remove running container")
+		return
+	}
+    container.DeleteWorkSpace(containerName, "")
+}

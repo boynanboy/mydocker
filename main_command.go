@@ -151,3 +151,67 @@ var stopCommand = cli.Command{
 		return nil
 	},
 }
+
+var removeCommand = cli.Command{
+	Name: "rm",
+	Usage: "remove unused containers",
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("Missing container name")
+		}
+		containerName := context.Args().Get(0)
+        // TODO this remove container may not work properly when container have
+        // volume have not tested it
+	    removeContainer(containerName)
+		return nil
+	},
+}
+
+// This is just a temporary command for clean up all containers
+// (make sure all containers stop firs) since "mydocker ps -q" does not exsits
+var cleanCommand = cli.Command{
+	Name: "clean",
+	Usage: "clean all the containers (for easy development) have to stop",
+	Action: func(context *cli.Context) error {
+        mergedDir := "./merged/"
+        writeLayerDir := "./container_layer/"
+        indexDir := "./index/"
+        logDir := "./logs/"
+        infoDir := "./info/"
+
+        // remove all the storage of containers
+        if err := os.RemoveAll(mergedDir); err != nil {
+            log.Errorf("Remove dir %s error %v", mergedDir, err)
+        }
+        if err := os.MkdirAll(mergedDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", mergedDir, err)
+        }
+        if err := os.RemoveAll(writeLayerDir); err != nil {
+            log.Errorf("Remove dir %s error %v", writeLayerDir, err)
+        }
+        if err := os.MkdirAll(writeLayerDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", writeLayerDir, err)
+        }
+        if err := os.RemoveAll(indexDir); err != nil {
+            log.Errorf("Remove dir %s error %v", indexDir, err)
+        }
+        if err := os.MkdirAll(indexDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", indexDir, err)
+        }
+        // remove container info and log if there is any
+        if err := os.RemoveAll(logDir); err != nil {
+            log.Errorf("Remove dir %s error %v", logDir, err)
+        }
+        if err := os.MkdirAll(logDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", logDir, err)
+        }
+        if err := os.RemoveAll(infoDir); err != nil {
+            log.Errorf("Remove dir %s error %v", infoDir, err)
+        }
+        if err := os.MkdirAll(infoDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", infoDir, err)
+        }
+
+        return nil
+	},
+}

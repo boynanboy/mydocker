@@ -133,7 +133,8 @@ func MountVolume(mergedURL string, volumeURLs []string)  {
 
 }
 
-
+// TODO: ideally the volume configs should be stored in meta data info
+//       so we can get volume by container name instead of parameter
 func DeleteWorkSpace(containerName string, volume string) {
     mergedURL := "./merged/" + containerName
     writeLayerURL := "./container_layer/" + containerName
