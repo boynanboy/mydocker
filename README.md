@@ -45,6 +45,8 @@ fix the issue where logs and info are not removed in delete workspace
 # for the code of Chapter 5.4 and whats next
 almost the same as the original code, just fixed some tiny import issues
 
+# for the code of Chapter 5.4 and whats next
+almost the same as the original code, just fixed some tiny import issues and function name issue
 
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
