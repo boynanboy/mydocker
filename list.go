@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"./container"
 	"io/ioutil"
-	"os"
+    "os"
 	"text/tabwriter"
 )
 
@@ -21,7 +20,7 @@ func ListContainers() {
 
 	var containers []*container.ContainerInfo
 	for _, file := range files {
-		tmpContainer, err := getContainerInfo(file)
+		tmpContainer, err := container.GetContainerInfo(file)
 		if err != nil {
 			log.Errorf("Get container info error %v", err)
 			continue
@@ -44,22 +43,4 @@ func ListContainers() {
 		log.Errorf("Flush error %v", err)
 		return
 	}
-}
-
-func getContainerInfo(file os.FileInfo) (*container.ContainerInfo, error) {
-	containerName := file.Name()
-	configFileDir := fmt.Sprintf(container.DefaultInfoLocation, containerName)
-	configFileDir = configFileDir + container.ConfigName
-	content, err := ioutil.ReadFile(configFileDir)
-	if err != nil {
-		log.Errorf("Read file %s error %v", configFileDir, err)
-		return nil, err
-	}
-	var containerInfo container.ContainerInfo
-	if err := json.Unmarshal(content, &containerInfo); err != nil {
-		log.Errorf("Json unmarshal error %v", err)
-		return nil, err
-	}
-
-	return &containerInfo, nil
 }

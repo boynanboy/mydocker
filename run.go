@@ -7,20 +7,16 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"strings"
-	"encoding/json"
-	"fmt"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
-         volume string, containerName string) {
+         volume string, containerName string, imageName string) {
 	if containerName == "" {
-		containerName = "noname" + randStringBytes(6)
+		containerName = "noname" + container.RandStringBytes(6)
 	}
-	parent, writePipe := container.NewParentProcess(tty, volume, containerName)
+	parent, writePipe := container.NewParentProcess(tty, volume,
+                                                    containerName, imageName)
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
@@ -31,7 +27,8 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
 
 	//record container info
     log.Infof("parent process id: %d", parent.Process.Pid)
-	containerName, err := recordContainerInfo(parent.Process.Pid, comArray, containerName)
+	containerName, err := container.RecordContainerInfo(parent.Process.Pid, comArray,
+                                              containerName, volume)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
 		return
@@ -61,50 +58,6 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 
 
 
-func recordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error) {
-	id := randStringBytes(12)
-	createTime := time.Now().Format("2006-01-02 15:04:05")
-	//createTime := time.Now()
-	command := strings.Join(commandArray, "")
-	if containerName == "" {
-		containerName = id
-	}
-	containerInfo := &container.ContainerInfo{
-		Id:          id,
-		Pid:         strconv.Itoa(containerPID),
-		Command:     command,
-		CreatedTime: createTime,
-		Status:      container.RUNNING,
-		Name:        containerName,
-	}
-
-	jsonBytes, err := json.Marshal(containerInfo)
-	if err != nil {
-		log.Errorf("Record container info error %v", err)
-		return "", err
-	}
-	jsonStr := string(jsonBytes)
-
-	dirUrl := fmt.Sprintf(container.DefaultInfoLocation, containerName)
-	if err := os.MkdirAll(dirUrl, 0622); err != nil {
-		log.Errorf("Mkdir error %s error %v", dirUrl, err)
-		return "", err
-	}
-	fileName := dirUrl + "/" + container.ConfigName
-	file, err := os.Create(fileName)
-	defer file.Close()
-	if err != nil {
-		log.Errorf("Create file %s error %v", fileName, err)
-		return "", err
-	}
-	if _, err := file.WriteString(jsonStr); err != nil {
-		log.Errorf("File write string error %v", err)
-		return "", err
-	}
-
-	return containerName, nil
-}
-
 //func deleteContainerInfo(containerId string) {
 	//dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerId)
 	//if err := os.RemoveAll(dirURL); err != nil {
@@ -112,12 +65,3 @@ func recordContainerInfo(containerPID int, commandArray []string, containerName 
 	//}
 //}
 
-func randStringBytes(n int) string {
-	letterBytes := "1234567890"
-	rand.Seed(time.Now().UnixNano())
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
-}

@@ -15,6 +15,10 @@ var (
 	Exit                string = "exited"
 	DefaultInfoLocation string = "./info/%s/"
 	DefaultLogLocation string = "./logs/%s.log"
+	DefaultMergedLocation string = "./merged/%s/"
+	DefaultImagesLocation string = "./images/%s.tar/"
+	DefaultReadOnlyLocationLayer string = "./base/%s/"
+	DefaultWritableLayerLocation string = "./container_layer/%s/"
 	ConfigName          string = "config.json"
 )
 
@@ -25,9 +29,10 @@ type ContainerInfo struct {
 	Command     string `json:"command"`    //容器内init运行命令
 	CreatedTime string `json:"createTime"` //创建时间
 	Status      string `json:"status"`     //容器的状态
+	Volume      string `json:"volume"`     //容器的mounted volume
 }
 
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume , containerName, imageName string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		log.Errorf("New pipe error %v", err)
@@ -44,22 +49,23 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		cmd.Stderr = os.Stderr
 	} else {
         // makes logs dir if it is not exists
-        os.MkdirAll(DefaultLogLocation, os.ModePerm)
+        os.MkdirAll("./logs/", os.ModePerm)
         stdLogFilePath := fmt.Sprintf(DefaultLogLocation, containerName)
         stdLogFile, err := os.Create(stdLogFilePath)
         if err != nil {
-            log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+            log.Errorf("NewParentProcess failed to create log file %s error %v",
+                       stdLogFilePath, err)
             return nil, nil
         }
         cmd.Stdout = stdLogFile
  	}
 
 	cmd.ExtraFiles = []*os.File{readPipe}
-    imageURL := "./image"
+
     // a index thing that is only needed for overlayfs do not totally
     // understand yet
-	NewWorkSpace(imageURL, volume, containerName)
-	cmd.Dir = "./merged/" + containerName
+	NewWorkSpace(imageName, volume, containerName)
+	cmd.Dir = fmt.Sprintf(DefaultMergedLocation, containerName)
 	return cmd, writePipe
 }
 
@@ -71,7 +77,33 @@ func NewPipe() (*os.File, *os.File, error) {
 	return read, write, nil
 }
 
-func createContainerLayer(mergedURL string, imageURL string, indexURL string, writeLayerURL string) {
+// create a temp read only layer
+// this is implementation is a extreme naive one and does not follow how docker
+// really works, since this is a proof of concept project to help me to understand
+// how docker works
+func createReadOnlyLayer(imageName string) error {
+	unTarFolderUrl := fmt.Sprintf(DefaultReadOnlyLocationLayer, imageName)
+	imageUrl := fmt.Sprintf(DefaultImagesLocation, imageName)
+	exist, err := PathExists(unTarFolderUrl)
+	if err != nil {
+		log.Infof("Fail to judge whether dir %s exists. %v", unTarFolderUrl, err)
+		return err
+	}
+	if !exist {
+		if err := os.MkdirAll(unTarFolderUrl, 0622); err != nil {
+			log.Errorf("Mkdir %s error %v", unTarFolderUrl, err)
+			return err
+		}
+
+		if _, err := exec.Command("tar", "-xvf", imageUrl, "-C", unTarFolderUrl).CombinedOutput(); err != nil {
+			log.Errorf("Untar dir %s error %v", unTarFolderUrl, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func createContainerLayer(mergedURL string, imageName string, indexURL string, writeLayerURL string) {
     // for easy coding did not check whether certain folders exists before
     // ideally should do it
 	if err := os.Mkdir(writeLayerURL, 0777); err != nil {
@@ -83,8 +115,9 @@ func createContainerLayer(mergedURL string, imageURL string, indexURL string, wr
 	if err := os.Mkdir(indexURL, 0777); err != nil {
 		log.Errorf("Mkdir dir %s error. %v", indexURL, err)
 	}
+	baseURL := fmt.Sprintf(DefaultReadOnlyLocationLayer, imageName)
 
-    dirs := "lowerdir=" + imageURL + ",upperdir=" + writeLayerURL + ",workdir=" + indexURL
+    dirs := "lowerdir=" + baseURL + ",upperdir=" + writeLayerURL + ",workdir=" + indexURL
     log.Infof("overlayfs union parameters: %s", dirs)
 	cmd := exec.Command("mount", "-t", "overlay", "overlay", "-o", dirs,  mergedURL)
 	cmd.Stdout = os.Stdout
@@ -95,11 +128,35 @@ func createContainerLayer(mergedURL string, imageURL string, indexURL string, wr
 
 }
 
-func NewWorkSpace(imageURL string, volume string, containerName string) {
+// create a temp read only layer
+func CreateReadOnlyLayer(imageName string) error {
+	unTarFolderUrl := fmt.Sprintf(DefaultReadOnlyLocationLayer, imageName)
+	imageUrl := fmt.Sprintf(DefaultImagesLocation, imageName)
+	exist, err := PathExists(unTarFolderUrl)
+	if err != nil {
+		log.Infof("Fail to judge whether dir %s exists. %v", unTarFolderUrl, err)
+		return err
+	}
+	if !exist {
+		if err := os.MkdirAll(unTarFolderUrl, 0622); err != nil {
+			log.Errorf("Mkdir %s error %v", unTarFolderUrl, err)
+			return err
+		}
+
+		if _, err := exec.Command("tar", "-xvf", imageUrl, "-C", unTarFolderUrl).CombinedOutput(); err != nil {
+			log.Errorf("Untar dir %s error %v", unTarFolderUrl, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func NewWorkSpace(imageName string, volume string, containerName string) {
     mergedURL := "./merged/" + containerName
     indexURL := "./index/" + containerName
     writeLayerURL := "./container_layer/" + containerName
-    createContainerLayer(mergedURL, imageURL, indexURL, writeLayerURL)
+    createReadOnlyLayer(imageName)
+    createContainerLayer(mergedURL, imageName, indexURL, writeLayerURL)
     if(volume != ""){
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
@@ -133,15 +190,17 @@ func MountVolume(mergedURL string, volumeURLs []string)  {
 
 }
 
-// TODO: ideally the volume configs should be stored in meta data info
-//       so we can get volume by container name instead of parameter
 func DeleteWorkSpace(containerName string, volume string) {
     mergedURL := "./merged/" + containerName
     writeLayerURL := "./container_layer/" + containerName
     indexURL := "./index/" + containerName
     logURL := fmt.Sprintf(DefaultLogLocation, containerName)
     infoURL := fmt.Sprintf(DefaultInfoLocation, containerName)
-    if(volume != ""){
+    if (volume == "") {
+	    containerInfo, _ := GetContainerInfoByName(containerName)
+        volume = containerInfo.Volume
+    }
+    if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
         if(length == 2 && volumeURLs[0] != "" && volumeURLs[1] !=""){

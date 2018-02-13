@@ -1,4 +1,5 @@
 image
+images
 mydocker
 volume
 merged
@@ -6,3 +7,4 @@ index
 info
 logs
 container_layer
+vendor

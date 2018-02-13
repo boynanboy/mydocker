@@ -1,24 +1,21 @@
 package main
 
 import (
-	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"./container"
-	"io/ioutil"
-	"encoding/json"
 	"strings"
 	"os/exec"
 	"os"
 	_ "./nsenter"
+    "./container"
 )
 
 const ENV_EXEC_PID = "mydocker_pid"
 const ENV_EXEC_CMD = "mydocker_cmd"
 
 func ExecContainer(containerName string, comArray []string) {
-	pid, err := getContainerPidByName(containerName)
+	pid, err := container.GetContainerPidByName(containerName)
 	if err != nil {
-		log.Errorf("Exec container getContainerPidByName %s error %v", containerName, err)
+		log.Errorf("Exec container GetContainerPidByName %s error %v", containerName, err)
 		return
 	}
 	cmdStr := strings.Join(comArray, " ")
@@ -36,19 +33,5 @@ func ExecContainer(containerName string, comArray []string) {
 	if err := cmd.Run(); err != nil {
 		log.Errorf("Exec container %s error %v", containerName, err)
 	}
-}
-
-func getContainerPidByName(containerName string) (string, error) {
-	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
-	configFilePath := dirURL + container.ConfigName
-	contentBytes, err := ioutil.ReadFile(configFilePath)
-	if err != nil {
-		return "", err
-	}
-	var containerInfo container.ContainerInfo
-	if err := json.Unmarshal(contentBytes, &containerInfo); err != nil {
-		return "", err
-	}
-	return containerInfo.Pid, nil
 }
 

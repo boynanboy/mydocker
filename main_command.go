@@ -51,6 +51,8 @@ var runCommand = cli.Command{
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
+        imageName := cmdArray[0]
+        cmdArray = cmdArray[1:]
         resConf := &subsystems.ResourceConfig{
             MemoryLimit: context.String("m"),
             CpuSet: context.String("cpuset"),
@@ -65,7 +67,7 @@ var runCommand = cli.Command{
         log.Infof("tty enabled %v", tty)
 		volume := context.String("v")
 		containerName := context.String("name")
-		Run(tty, cmdArray, resConf, volume, containerName)
+		Run(tty, cmdArray, resConf, volume, containerName, imageName)
 		return nil
 	},
 }
@@ -162,7 +164,7 @@ var removeCommand = cli.Command{
 		containerName := context.Args().Get(0)
         // TODO this remove container may not work properly when container have
         // volume have not tested it
-	    removeContainer(containerName)
+	    container.RemoveContainer(containerName)
 		return nil
 	},
 }
