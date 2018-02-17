@@ -57,6 +57,9 @@ almost the same as the original code, however since the implementation of this c
 In real docker world commit are implemented by copy files of container writable layer to image read-only layers with proper re-indexing.
 To implemented things to that really will take too much time.
 
+# for the code of Chapter 5.8 and whats next
+almost the same as the original code, during the time test this stage I found issues in command line arg parsing(when environment and container name, it will mistakely take the later one as the image name), however such thing is not the main point of this project(understand docker working mechnism). SoI do not want spend extra time for this problem for now.
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
