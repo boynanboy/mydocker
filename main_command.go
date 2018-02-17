@@ -41,11 +41,15 @@ var runCommand = cli.Command{
 			Name:  "name",
 			Usage: "container name",
 		},
+		cli.StringSliceFlag{
+			Name: "e",
+			Usage: "set environment",
+		},
 
 	},
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
-			return fmt.Errorf("Missing container command")
+		if len(context.Args()) < 2 {
+			return fmt.Errorf("Missing image or container command")
 		}
 		var cmdArray []string
 		for _, arg := range context.Args() {
@@ -67,7 +71,8 @@ var runCommand = cli.Command{
         log.Infof("tty enabled %v", tty)
 		volume := context.String("v")
 		containerName := context.String("name")
-		Run(tty, cmdArray, resConf, volume, containerName, imageName)
+        envSlice := context.StringSlice("e")
+		Run(tty, cmdArray, resConf, volume, containerName, imageName, envSlice)
 		return nil
 	},
 }

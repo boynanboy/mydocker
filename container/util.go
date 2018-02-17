@@ -120,6 +120,18 @@ func RemoveContainer(containerName string) {
     DeleteWorkSpace(containerName, "")
 }
 
+func GetEnvsByPid(pid string) []string {
+	path := fmt.Sprintf("/proc/%s/environ", pid)
+	contentBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Errorf("Read file %s error %v", path, err)
+		return nil
+	}
+	//env split by \u0000 ?
+	envs := strings.Split(string(contentBytes), "\u0000")
+	return envs
+}
+
 func RandStringBytes(n int) string {
 	letterBytes := "1234567890"
 	rand.Seed(time.Now().UnixNano())

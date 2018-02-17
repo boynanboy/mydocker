@@ -32,7 +32,7 @@ type ContainerInfo struct {
 	Volume      string `json:"volume"`     //容器的mounted volume
 }
 
-func NewParentProcess(tty bool, volume , containerName, imageName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume , containerName, imageName string, envSlice []string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		log.Errorf("New pipe error %v", err)
@@ -61,6 +61,7 @@ func NewParentProcess(tty bool, volume , containerName, imageName string) (*exec
  	}
 
 	cmd.ExtraFiles = []*os.File{readPipe}
+	cmd.Env = append(os.Environ(), envSlice...)
 
     // a index thing that is only needed for overlayfs do not totally
     // understand yet

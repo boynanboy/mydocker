@@ -11,12 +11,13 @@ import (
 
 
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
-         volume string, containerName string, imageName string) {
+         volume string, containerName string, imageName string,
+         envSlice []string) {
 	if containerName == "" {
 		containerName = "noname" + container.RandStringBytes(6)
 	}
-	parent, writePipe := container.NewParentProcess(tty, volume,
-                                                    containerName, imageName)
+	parent, writePipe := container.NewParentProcess(tty, volume, containerName, 
+                                                    imageName, envSlice)
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
@@ -28,7 +29,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
 	//record container info
     log.Infof("parent process id: %d", parent.Process.Pid)
 	containerName, err := container.RecordContainerInfo(parent.Process.Pid, comArray,
-                                              containerName, volume)
+                                                        containerName, volume)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
 		return
@@ -44,7 +45,6 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig,
     // todo for test purpose rm the -ti container when its stop
     if tty {
 	    parent.Wait()
-		//deleteContainerInfo(containerName)
         container.DeleteWorkSpace(containerName, volume)
     }
 }
