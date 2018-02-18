@@ -51,6 +51,12 @@ almost the same as the original code, just fixed some tiny import issues and fun
 # for the code of Chapter 5.6 and whats next
 almost the same as the original code, add a clean command to remove all the containers related files for testing reason
 
+# for the code of Chapter 5.7 and whats next
+almost the same as the original code, however since the implementation of this commit is too far away from the real docker so really did not get motivated.
+
+In real docker world commit are implemented by copy files of container writable layer to image read-only layers with proper re-indexing.
+To implemented things to that really will take too much time.
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
