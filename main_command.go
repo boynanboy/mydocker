@@ -177,6 +177,7 @@ var cleanCommand = cli.Command{
 	Action: func(context *cli.Context) error {
         mergedDir := "./merged/"
         writeLayerDir := "./container_layer/"
+        readLayerDir := "./base/"
         indexDir := "./index/"
         logDir := "./logs/"
         infoDir := "./info/"
@@ -213,7 +214,27 @@ var cleanCommand = cli.Command{
         if err := os.MkdirAll(infoDir, 0622); err != nil {
             log.Errorf("Mkdir error %s error %v", infoDir, err)
         }
+        if err := os.RemoveAll(readLayerDir); err != nil {
+            log.Errorf("Remove dir %s error %v", infoDir, err)
+        }
+        if err := os.MkdirAll(readLayerDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", infoDir, err)
+        }
 
         return nil
 	},
+}
+
+var commitCommand = cli.Command{
+	Name:  "commit",
+	Usage: "commit a container into image",
+ 	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 2 {
+			return fmt.Errorf("Missing container name and image name")
+		}
+		containerName := context.Args().Get(0)
+		imageName := context.Args().Get(1)
+		commitContainer(containerName, imageName)
+		return nil
+    },
 }

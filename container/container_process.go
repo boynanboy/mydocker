@@ -16,8 +16,8 @@ var (
 	DefaultInfoLocation string = "./info/%s/"
 	DefaultLogLocation string = "./logs/%s.log"
 	DefaultMergedLocation string = "./merged/%s/"
-	DefaultImagesLocation string = "./images/%s.tar/"
-	DefaultReadOnlyLocationLayer string = "./base/%s/"
+	DefaultImagesLocation string = "./images/%s.tar"
+	DefaultReadOnlyLocationLayer string = "./base/%s"
 	DefaultWritableLayerLocation string = "./container_layer/%s/"
 	ConfigName          string = "config.json"
 )
@@ -95,6 +95,7 @@ func createReadOnlyLayer(imageName string) error {
 			return err
 		}
 
+		log.Infof("Untar dir %s from %s", unTarFolderUrl, imageUrl)
 		if _, err := exec.Command("tar", "-xvf", imageUrl, "-C", unTarFolderUrl).CombinedOutput(); err != nil {
 			log.Errorf("Untar dir %s error %v", unTarFolderUrl, err)
 			return err
