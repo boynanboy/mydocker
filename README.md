@@ -10,8 +10,9 @@ Cheng Yu (s3341458, chengyu0316@gmail.com) modified it on each chapter branch on
 
 1. original code has bugs and obsolete code due to library updates, so go build will fail
 2. original code has wrong imports
-3. original code works on a old Ubuntu 14.04 linux kernel 3.13, I am using archlinux with much newer kernel
-4. original code is not ideal in terms of the code of itself (but at OK level)
+3. original code of each chapter is not coherent. (eg, code of chapter 3.2 is actually ahead chapter 3.3)
+4. original code works on a old Ubuntu 14.04 linux kernel 3.13, I am using archlinux with much newer kernel
+5. original code is not ideal in terms of the code of itself (but at OK level)
 
 difference with original code base
 
