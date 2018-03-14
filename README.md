@@ -1,6 +1,17 @@
-# <<自己动手写docker>> 源码
+# 图书<<自己动手写docker>> 源码 喻成改编版
 
-Cheng Yu (s3341458, chengyu0316@gmail.com) modified it in order to makes it work on my machine
+This project is forked from https://github.com/xianlubird/mydocker which is a educational
+container engine for book "write Docker from scratch". This book and project provides guidence
+to readers about how a build a simplified "Docker Engine".
+
+
+Cheng Yu (s3341458, chengyu0316@gmail.com) modified it on each chapter branch on
+{{ original branch }}-cheng for following reasons:
+
+1. original code has bugs and obsolete code due to library updates, so go build will fail
+2. original code has wrong imports
+3. original code works on a old Ubuntu 14.04 linux kernel 3.13, I am using archlinux with much newer kernel
+4. original code is not ideal in terms of the code of itself (but at OK level)
 
 difference with original code base
 
@@ -63,11 +74,10 @@ almost the same as the original code, during the time test this stage I found is
 # for the code of Chapter 6.5 (last chapter)
 Almost the same as the original code, fix some bugs manage the code in a slightly more elegant way.
 All networks and ipam information will be put into networks folder in mydocker directory
+Due to a command args parsing bug, you need to specify image by --image and command by --command, this is different with how Docker looks in real world.
 
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
-
 sometimes the code in this book can not properly distinguish the whether the args are more  mydocker or for the wrapped command.
-
 better use it in sudo ./mydocker -args argv "command command-args"
