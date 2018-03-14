@@ -60,6 +60,10 @@ To implemented things to that really will take too much time.
 # for the code of Chapter 5.8 and whats next
 almost the same as the original code, during the time test this stage I found issues in command line arg parsing(when environment and container name, it will mistakely take the later one as the image name), however such thing is not the main point of this project(understand docker working mechnism). SoI do not want spend extra time for this problem for now.
 
+# for the code of Chapter 6.5 (last chapter)
+Almost the same as the original code, fix some bugs manage the code in a slightly more elegant way.
+All networks and ipam information will be put into networks folder in mydocker directory
+
 # P.S
 branch {{branch}}-cheng is my modifications on {{branch}} which makes it runable on my machine
 
