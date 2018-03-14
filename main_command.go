@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 	"./cgroups/subsystems"
 	"./container"
+	"./network"
 )
 
 var runCommand = cli.Command{
@@ -45,18 +46,37 @@ var runCommand = cli.Command{
 			Name: "e",
 			Usage: "set environment",
 		},
+        cli.StringFlag{
+            Name:  "net",
+            Usage: "container network",
+        },
+        cli.StringFlag{
+            Name:  "image",
+            Usage: "select image run on",
+        },
+        cli.StringFlag{
+            Name:  "command",
+            Usage: "command that will run towards",
+        },
+        cli.StringSliceFlag{
+            Name: "p",
+            Usage: "port mapping",
+        },
 
 	},
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 2 {
-			return fmt.Errorf("Missing image or container command")
-		}
-		var cmdArray []string
-		for _, arg := range context.Args() {
-			cmdArray = append(cmdArray, arg)
-		}
-        imageName := cmdArray[0]
-        cmdArray = cmdArray[1:]
+        imageName := context.String("image")
+        log.Infof("image name: %s", imageName)
+        if imageName == "" {
+			log.Errorf("Missing image name")
+            return nil
+        }
+        command := context.String("command")
+        log.Infof("command: %s", command)
+        if command == "" {
+			log.Errorf("Missing container command")
+            return nil
+        }
         resConf := &subsystems.ResourceConfig{
             MemoryLimit: context.String("m"),
             CpuSet: context.String("cpuset"),
@@ -66,13 +86,17 @@ var runCommand = cli.Command{
 		tty := context.Bool("ti")
         detach := context.Bool("d")
         if tty && detach {
-            return fmt.Errorf("ti and d paramter can not both provided")
+            log.Errorf("ti and d paramter can not both provided")
+            return nil
         }
         log.Infof("tty enabled %v", tty)
 		volume := context.String("v")
 		containerName := context.String("name")
         envSlice := context.StringSlice("e")
-		Run(tty, cmdArray, resConf, volume, containerName, imageName, envSlice)
+        portMapping := context.StringSlice("p")
+        network := context.String("net")
+		Run(tty, command, resConf, volume, containerName, imageName,
+            envSlice, network, portMapping)
 		return nil
 	},
 }
@@ -186,6 +210,7 @@ var cleanCommand = cli.Command{
         indexDir := "./index/"
         logDir := "./logs/"
         infoDir := "./info/"
+        networksDir := "./networks"
 
         // remove all the storage of containers
         if err := os.RemoveAll(mergedDir); err != nil {
@@ -225,6 +250,12 @@ var cleanCommand = cli.Command{
         if err := os.MkdirAll(readLayerDir, 0622); err != nil {
             log.Errorf("Mkdir error %s error %v", infoDir, err)
         }
+        if err := os.RemoveAll(networksDir); err != nil {
+            log.Errorf("Remove dir %s error %v", infoDir, err)
+        }
+        if err := os.MkdirAll(networksDir, 0622); err != nil {
+            log.Errorf("Mkdir error %s error %v", infoDir, err)
+        }
 
         return nil
 	},
@@ -242,4 +273,63 @@ var commitCommand = cli.Command{
 		commitContainer(containerName, imageName)
 		return nil
     },
+}
+
+
+var networkCommand = cli.Command{
+	Name:  "network",
+	Usage: "container network commands",
+	Subcommands: []cli.Command {
+		{
+			Name: "create",
+			Usage: "create a container network",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "driver",
+					Usage: "network driver",
+				},
+				cli.StringFlag{
+					Name:  "subnet",
+					Usage: "subnet cidr",
+				},
+			},
+			Action:func(context *cli.Context) error {
+				if len(context.Args()) < 1 {
+					return fmt.Errorf("Missing network name")
+				}
+				network.Init()
+				err := network.CreateNetwork(context.String("driver"),
+                                             context.String("subnet"),
+                                             context.Args()[0])
+				if err != nil {
+					return fmt.Errorf("create network error: %+v", err)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "list",
+			Usage: "list container network",
+			Action:func(context *cli.Context) error {
+				network.Init()
+				network.ListNetwork()
+				return nil
+			},
+		},
+		{
+			Name: "remove",
+			Usage: "remove container network",
+			Action:func(context *cli.Context) error {
+				if len(context.Args()) < 1 {
+					return fmt.Errorf("Missing network name")
+				}
+				network.Init()
+				err := network.DeleteNetwork(context.Args()[0])
+				if err != nil {
+					return fmt.Errorf("remove network error: %+v", err)
+				}
+				return nil
+			},
+		},
+	},
 }

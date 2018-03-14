@@ -13,12 +13,12 @@ import (
 )
 
 
-func RecordContainerInfo(containerPID int, commandArray []string,
-                         containerName string, volume string) (string, error) {
+func RecordContainerInfo(containerPID int, command string,
+                         containerName string, volume string,
+                         portMapping []string) (*ContainerInfo, error) {
 	id := RandStringBytes(12)
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	//createTime := time.Now()
-	command := strings.Join(commandArray, "")
 	if containerName == "" {
 		containerName = id
 	}
@@ -30,33 +30,34 @@ func RecordContainerInfo(containerPID int, commandArray []string,
 		Status:      RUNNING,
 		Name:        containerName,
 		Volume:      volume,
+		PortMapping: portMapping,
 	}
 
 	jsonBytes, err := json.Marshal(containerInfo)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
-		return "", err
+		return nil, err
 	}
 	jsonStr := string(jsonBytes)
 
 	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
 	if err := os.MkdirAll(dirUrl, 0622); err != nil {
 		log.Errorf("Mkdir error %s error %v", dirUrl, err)
-		return "", err
+		return nil, err
 	}
 	fileName := dirUrl + "/" + ConfigName
 	file, err := os.Create(fileName)
 	defer file.Close()
 	if err != nil {
 		log.Errorf("Create file %s error %v", fileName, err)
-		return "", err
+		return nil, err
 	}
 	if _, err := file.WriteString(jsonStr); err != nil {
 		log.Errorf("File write string error %v", err)
-		return "", err
+        return nil, err
 	}
 
-	return containerName, nil
+	return containerInfo, nil
 }
 
 func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {

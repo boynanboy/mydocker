@@ -40,6 +40,7 @@ func readUserCommand() []string {
 		log.Errorf("init read pipe error %v", err)
 		return nil
 	}
+	log.Infof("pipe read result %s", msg)
 	msgStr := string(msg)
 	return strings.Split(msgStr, " ")
 }
