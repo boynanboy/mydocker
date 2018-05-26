@@ -139,29 +139,6 @@ func createContainerLayer(mergedURL string, imageName string, indexURL string, w
 
 }
 
-// create a temp read only layer
-func CreateReadOnlyLayer(imageName string) error {
-	unTarFolderUrl := fmt.Sprintf(DefaultReadOnlyLocationLayer, imageName)
-	imageUrl := fmt.Sprintf(DefaultImagesLocation, imageName)
-	exist, err := PathExists(unTarFolderUrl)
-	if err != nil {
-		log.Infof("Fail to judge whether dir %s exists. %v", unTarFolderUrl, err)
-		return err
-	}
-	if !exist {
-		if err := os.MkdirAll(unTarFolderUrl, 0622); err != nil {
-			log.Errorf("Mkdir %s error %v", unTarFolderUrl, err)
-			return err
-		}
-
-		if _, err := exec.Command("tar", "-xvf", imageUrl, "-C", unTarFolderUrl).CombinedOutput(); err != nil {
-			log.Errorf("Untar dir %s error %v", unTarFolderUrl, err)
-			return err
-		}
-	}
-	return nil
-}
-
 func NewWorkSpace(imageName string, volume string, containerName string) {
     mergedURL := "./merged/" + containerName
     indexURL := "./index/" + containerName
