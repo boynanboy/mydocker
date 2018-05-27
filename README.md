@@ -1,11 +1,13 @@
+please read file how_to_play.txt to get a basic idea of how to play it.
+
+
 # 图书<<自己动手写docker>> 源码 喻成改编版
 
 This project is forked from https://github.com/xianlubird/mydocker which is a educational
-container engine for book "write Docker from scratch". This book and project provides guidence
-to readers about how a build a simplified "Docker Engine".
+container engine for the book "write Docker from scratch". This book and this project provides
+guidences about how a build a simplified "Docker Engine".
 
-
-Cheng Yu (s3341458, chengyu0316@gmail.com) modified it on each chapter branch on
+Cheng Yu (s3341458, chengyu0316@gmail.com) modified it on each chapter branch and master branch 
 {{ original branch }}-cheng for following reasons:
 
 1. original code has bugs and obsolete code due to library updates, so go build will fail
@@ -14,7 +16,7 @@ Cheng Yu (s3341458, chengyu0316@gmail.com) modified it on each chapter branch on
 4. original code works on a old Ubuntu 14.04 linux kernel 3.13, I am using archlinux with much newer kernel
 5. original code is not ideal in terms of the code of itself (but at OK level)
 
-difference with original code base
+Here are the differences compare to original code base
 
 # for the code of Chapter 3.1 and what's next
 I fixed the issue that old code tried to imported the wrong package from github

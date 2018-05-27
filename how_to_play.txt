@@ -1,0 +1,20 @@
+setup
+git clone git@github.com:s3341458/mydocker.git
+cd mydocker
+go build .
+
+sample one:
+sudo ./mydocker run -ti -image busybox -command /bin/sh
+
+test network
+sudo ./mydocker network create --subnet 192.168.0.0/24 --driver bridge testbridge
+sudo ./mydocker run -ti -p 80:80 --net testbridge -image busybox -command /bin/sh
+
+you can also get help by command ./mydocker -h
+
+All commands are defined in main_command.go, since this is a such simple project
+it is not difficult for experienced programmer to figure out how to use it.
+
+since this project is for me to play with, so no much documentions of how to play
+with it. If anyone want to know more details feel free to email me through
+chengyu0316@gmail.com

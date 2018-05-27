@@ -1,7 +1,0 @@
-sudo ./mydocker network create --subnet 192.168.0.0/24 --driver bridge testbridge
-sudo ./mydocker run -ti -p 80:80 --net testbridge -image busybox -command /bin/sh
-
-
-sample one:
-sudo ./mydocker run -ti -image busybox -command /bin/sh
-
